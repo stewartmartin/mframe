@@ -1,0 +1,16 @@
+{
+  "label": "merjIT/Framework",
+  "description": "Framework and Skeleton for rapid application development",
+  "autoload": {
+    "src": true,
+    "init": false
+  },
+  "version": "3.4.1",
+  "license": "Allow",
+  "authors": [
+    {
+      "name": "Richard Martin",
+      "email": "stewart@merjit.com"
+    }
+  ]
+}

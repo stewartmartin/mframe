@@ -15,8 +15,20 @@ if(is_dir(ROOT . "bin")){
 
 define("BIN", ROOT . "bin" . DIRECTORY_SEPERATOR);
 
-if(file_exists(BIN . "setup.php"){
-    require_once(BIN . "setup.php");
-} else {
-    //determine command, and its arguements.
-}
+if(!file_exists(BIN . "setup.php"){
+    //Process the command from here.
+    if($argc >= 2){
+        $command = str_replace(strtolower($argv[1]);
+        if(file_exists(BIN . $command . ".php")){
+            require_once(BIN . $command . "php");
+            if(class_exists()){
+                $params = array_shift( array_shift($argv) );
+                $execute = new $command($params);
+        }
+    } else {
+        //Print info and standard help message.
+    }
+} 
+
+//Run setup.
+require_once(BIN . "setup.php");

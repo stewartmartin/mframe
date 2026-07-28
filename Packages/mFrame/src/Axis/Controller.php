@@ -7,6 +7,7 @@ use mFrame\Pattern\Factory;
 abstract class Controller extends Factory {
 
     public array $requiredModels = [];
+    public bool $isApi = false;
 
     public function run(){
         if(empty($this->requiredModels)){
@@ -36,7 +37,15 @@ abstract class Controller extends Factory {
         }
     }
 
-    protected function standardReturn(string $viewRequested, array $viewData = [], string $viewSwitch = "index") : array {
+    protected function standardReturn(string $viewRequested = "", array $viewData = [], string $viewSwitch = "index") : array {
+        if(empty($viewRequested)){
+            $viewRequested = "pages";
+        }
+
+        if($this-isApi || ( strtolower($viewRequested) == "api") ){
+            renderApi($viewData);
+        }
+        
         return array(
             "viewFile" => $viewRequested,
             "switch" => $viewSwitch,

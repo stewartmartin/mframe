@@ -1,1 +1,22 @@
+#!/usr/bin/env php
 
+<?php
+
+define("ROOT", realpath(dirname(__FILE) . DIRECTORY_SEPERATOR));
+if(!file_exists(ROOT . "functions.php")){
+    die("missing required function, terminating execution" . PHP_EOL);
+}
+
+require_once(ROOT . "functions.php");
+
+if(is_dir(ROOT . "bin")){
+    terminate("Missing the required bin directory to execute commands" . PHP_EOL);
+}
+
+define("BIN", ROOT . "bin" . DIRECTORY_SEPERATOR);
+
+if(file_exists(BIN . "setup.php"){
+    require_once(BIN . "setup.php");
+} else {
+    //determine command, and its arguements.
+}

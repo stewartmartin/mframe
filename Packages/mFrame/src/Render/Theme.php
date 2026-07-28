@@ -12,6 +12,8 @@ class Theme extends Singleton {
     protected static array $parsed_view;
     protected static array $order = ["head", "menu", "content", "foot"];
 
+    public static bool $isApi = false;
+
     public static function run() : void {
         if(static::getDirective("Application", "theme")){
             static::$theme_directive = ucfirst( strtolower( static::getDirective("Application", "theme") ) );
@@ -52,9 +54,9 @@ class Theme extends Singleton {
         return false;
     }
 
-    protected static function render() : void {
+    protected static function render(string $partial = "") : void {
         echo implode("\n", static::$partials);
-        die();
+        exit;
     }
 
 }

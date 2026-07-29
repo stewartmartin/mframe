@@ -80,8 +80,6 @@ class frontal {
         }
     }
 
-
-
     public static function setStructure(array $customStructure = []) : bool {
         if(empty($customStructure)){
             $structure = array(
@@ -105,6 +103,113 @@ class frontal {
         }
 
         return true;
+    }
+
+    /*
+     * Here we're going to setup the static in order to load and get the application ready.
+     */
+    protected static array | object $RawConfig;
+
+    public static function SysCheck() : bool {
+        if(self::loadDirectives()){
+            if(self::loadStructure()){
+                $app_foundation = array("Controllers", "Middleware", "Models", "Views");
+                foreach($app_foundation as $dir){
+                    if(!defined("Structure_App_" . $dir)){
+                        terminate("Application structure " . $dir . " is not defined.");
+                    }
+
+                    if(!is_dir(constant("Structure_App_" . $dir))){
+                        terminate("Application structure " . $dir . " is not a directory.");
+                    }
+                }
+
+                return self::startFramework();
+
+            }
+            terminate("We were not able to define the system directory structure.");
+        }
+
+        terminate("We are missing the important config folder or not able to access it.");
+    }
+
+    protected static function loadDirectives($type = "array") : bool {
+        if(empty(self::$RawConfig)) {
+            if (defined("Structure_Directives_Config")) {
+                $items = realscan(Structure_Directives_Config);
+                $directives = array();
+                if (!empty($items)) {
+                    foreach ($items as $item) {
+                        $directives[str_replace(".php", "", $item)] = include(Structure_Directives_Config . $item);
+                    }
+                }
+
+                if (!empty($directives)) {
+                    return toDefine($directives, "directives");
+                }
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    protected static function loadStructure(bool $returnStructure = false) : bool | array {
+        $directories = array(
+            "Public" => "Public",
+            "bin" => "bin",
+            "App" =>
+                array(
+                    "ROOT" => "App",
+                    "Models" => "Models",
+                    "Views" => "Views",
+                    "Controllers" => "Controllers",
+                    "Middlewares" => "Middlewares",
+                ),
+            "Directives" =>
+                array(
+                    "Config" => "Config",
+                    "Routes" => "Routes",
+                ),
+            "Tasks" => "Tasks",
+            "Database" => "Database",
+            "Packages" => "Packages",
+            "Storage" => array(
+                "ROOT" => "Storage",
+                "Cache" => "Cache",
+                "Logs" => "Logs",
+                "Sessions" => "Sessions"
+            )
+        );
+
+        //we shouldn't need anything other than the out-of-pocket directories php file on the root folder.
+        if( file_exists(ROOT . "Structure.php" ) ){
+            $custom = include(ROOT . "Structure.php");
+            if(!empty($custom)){
+                $directories = $custom;
+            }
+        }
+
+        if($returnStructure){
+            return $directories;
+        }
+
+        return toDefine($directories, "structure");
+    }
+
+    protected static function startFramework() : bool {
+        $framework = "mFrame";
+        if(array_key_exists("framework", self::$RawConfig["App"])){
+            $framework = self::$RawConfig["App"]["framework"];
+        }
+
+        $packageReady = false;
+        if(file_exists(ROOT . $framework . DIRECTORY_SEPARATOR . "Entry.php")){
+            require_once(ROOT . $framework . DIRECTORY_SEPARATOR . "Entry.php");
+        }
+
+        return $packageReady;
     }
 
 

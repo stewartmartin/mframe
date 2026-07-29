@@ -1,6 +1,6 @@
 <?php
 
-//set the root, Public and the rest shall be handled by frontal incase of customization.
+//set the root, public and the rest shall be handled by frontal in case of customization.
 define("ROOT", dirname(__FILE__, 2) . DIRECTORY_SEPARATOR );
 
 $startupFiles = array("functions" => "required functions file", "frontal" => "required frontal file");

@@ -12,56 +12,45 @@ class frontal {
     protected Request $Request;
 
     public function __construct(){
-        //Our directives should have been set and defined at this point. Lets make sure we have our packages.
-        if(defined("PACKAGES")) {
-            //The absolute first thing we need is our framework. So lets make sure its there and then grab that bitch.
-            $abs2Frame = PACKAGES . "mFrame" . DIRECTORY_SEPARATOR;
-            if (is_dir($abs2Frame) && file_exists($abs2Frame . "Entry.php")) {
-                //Framework is the basis of the entire app/skeleton. It also sets foundations for additional custom packages.
-                require_once($abs2Frame . "Entry.php");
-
-                //From here we should determine our area.
-                $this->setArea();
-            }
-        } else {
-            terminate("Directives where not loaded/parsed correctly.");
-        }
-    }
-
-    protected function setArea() : void {
         $this->Router = Router::initiate([]);
         $this->Request = Request::initiate([]);
 
-        if(file_exists(DIRECTIVES . "Routing" . DIRECTORY_SEPARATOR . $this->Request::$requested_area["routes_file"])){
-            require_once(DIRECTIVES . "Routing" . DIRECTORY_SEPARATOR . $this->Request::$requested_area["routes_file"]);
-            $parse_request = $this->Router::Dispatch();
-            if(is_array($parse_request)) {
-                $this->load_controller($parse_request);
-            }
-        }
+        if(defined("Structure_Directives_Routes")){
+            if(is_dir(Structure_Directives_Routes)){
+                autoload(Structure_Directives_Routes);
 
-        terminate("Invalid area and or routes");
-    }
-
-    protected function load_controller(array $parse_request) : void {
-        $controller_path = APP . "Controllers" . DIRECTORY_SEPARATOR . ucfirst( strtolower($parse_request["controller"]) ) . ".php";
-        if(file_exists($controller_path)) {
-            $control = extractName($controller_path, "n") . "\\" . extractName($controller_path, "c");
-            require_once($controller_path);
-
-            $method = $parse_request["method"];
-            $params = $parse_request["params"];
-
-            $control = new $control();
-            if(method_exists($control, $method)) {
-                $parsed_request = $control->$method($params);
-                if(is_array($parsed_request)){
-                    $this->render($parsed_request);
+                $dispatch = $this->Router->dispatch();
+                if(is_array($dispatch)){
+                    $this->load_controller($dispatch);
                 }
             }
         }
 
-        terminate("There was an error processing the user request.");
+        terminate("There was an issue parsing the request for this application.");
+    }
+
+    protected function load_controller(array $parse_request) : void {
+        if(defined("Structure_App_Controllers")) {
+            $controller_path = Structure_App_Controllers . ucfirst(strtolower($parse_request["controller"])) . ".php";
+            if (file_exists($controller_path)) {
+                $control = extractName($controller_path, "n") . "\\" . extractName($controller_path, "c");
+                require_once($controller_path);
+
+                $method = $parse_request["method"];
+                $params = $parse_request["params"];
+
+                $control = new $control();
+                if (method_exists($control, $method)) {
+                    $parsed_request = $control->$method($params);
+                    if (is_array($parsed_request)) {
+                        $this->render($parsed_request);
+                    }
+                }
+                terminate("There was an issue processing the requested URI.");
+            }
+            terminate("We were not able to find the requested path.");
+        }
+        terminate("There are missing structure definitions.");
     }
 
     protected function render(array $parsed_request) : void {

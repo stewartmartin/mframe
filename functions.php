@@ -49,6 +49,33 @@ function toObject(array $arrayToConvert) : object | bool {
     return false;
 }
 
+function toDefine(array $defines, string $prefix = "", string $separator = "") : bool {
+    $keys = array_keys($defines);
+    foreach($keys as $key){
+        if(!is_array($defines[$key])){
+            //There may need to be a check here on if "ROOT" is passed, which should be applied to "prefix"
+            $CompiledValue = $defines[$key];
+            $CompiledConstant = str_replace(" ", "", !empty($prefix) ? ucwords($prefix) . $separator .ucwords($key) : ucwords($key));
+            if($key == "ROOT"){
+                $CompiledConstant = $prefix;
+            }
+
+            if(!defined($CompiledConstant)){
+                define($CompiledConstant, $CompiledValue);
+                continue;
+            }
+
+            terminate("Define failure on: " . $CompiledConstant);
+        } else {
+            foreach($defines[$key] as $key => $value){
+                toDefine($value, $key);
+            }
+        }
+    }
+
+    return true;
+}
+
 function terminate(string $message, bool $print_backtrace = true) : void {
     $error = $message;
     if($print_backtrace){

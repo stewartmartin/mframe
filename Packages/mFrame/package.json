@@ -1,5 +1,5 @@
 {
-  "label": "merjIT/Framework",
+  "label": "merzIT/Framework",
   "description": "Framework and Skeleton for rapid application development",
   "autoload": {
     "src": true,
@@ -10,7 +10,7 @@
   "authors": [
     {
       "name": "Richard Martin",
-      "email": "stewart@merjit.com"
+      "email": "stewart@merzit.com"
     }
   ]
 }

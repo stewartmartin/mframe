@@ -30,13 +30,14 @@ class Model extends Factory {
             $query = $this->db->query("DESCRIBE " . $this->table);
             $query->execute();
             $results = $query->fetchAll();
-            foreach($results as $result){
-                $this->fields[] = $result["Field"];
-                if(end($result) == "primary"){
-                    $this->id = $result[0];
-                    break;
+            if(!empty($results)){
+                foreach($results as $result){
+                    $this->{$result["Field"]} = null;
+                    $this->fields[] = $result["Field"];
+                    if($result["key"] == "PRI"){
+                        $this->id = $result["Field"];
+                    }
                 }
-                continue;
             }
         }
     }
@@ -168,6 +169,64 @@ class Model extends Factory {
         $query = $this->db->prepare($statement);
         $query->execute();
         return $query->fetchAll();
+    }
+
+    public function findBy(string $column, mixed $value) : bool {
+        if(in_array($column, $this->fields)){
+            $result = $this->obtain(
+                $this->select("*") . $this->setClause([$column, "=", $value])
+            );
+
+            if(!empty($result)){
+                if(count($result) == 1){
+                    $this->parse($result[0]);
+                } else {
+                    $this->parse($result, true);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function findById(int $id) : bool {
+        $result = $this->obtain(
+            $this->select("*") . $this->setClause([$this->id, "=", $id])
+        );
+
+        if(!empty($result)){
+            if(count($result) == 1){
+                $this->parse($result[0]);
+            }
+        }
+
+        //We should never have a
+        return false;
+    }
+
+    protected function parse(mixed $data, bool $isMany = false) : bool {
+        if(is_object($data)){
+            $data = toArray($data);
+        }
+
+        if($isMany){
+            foreach($data as $result => $rdata){
+                foreach($rdata as $key => $value){
+                    $this->{$key}[] = $value;
+                }
+            }
+
+            return true;
+        } else {
+            if(!empty($data) && is_array($data)) {
+                foreach ($data as $key => $value) {
+                    $this->push($key, $value);
+                }
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

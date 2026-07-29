@@ -126,10 +126,8 @@ function loadJSON(string $path_to_json, bool $asObject = false) : bool | array {
 
 function renderApi(array $data, int $status = 200, string $message = "") : void {
     header("Content-Type: application/json");
-    $dump = ["status" => $status, "message" => $message];
-    if(!empty($data)){
-        $dump["data"] = $data;
-    }
-    echo json_encode($data);
+    header("Content-Type: application/json");
+    http_response_code($status);
+    echo json_encode(array("code" => $status, "message" => $message, "data" => $data));
     exit;
 }

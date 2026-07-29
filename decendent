@@ -2,7 +2,7 @@
 
 <?php
 
-define("ROOT", realpath(dirname(__FILE) . DIRECTORY_SEPERATOR));
+define("ROOT", realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR));
 if(!file_exists(ROOT . "functions.php")){
     die("missing required function, terminating execution" . PHP_EOL);
 }
@@ -13,20 +13,47 @@ if(is_dir(ROOT . "bin")){
     terminate("Missing the required bin directory to execute commands" . PHP_EOL);
 }
 
-define("BIN", ROOT . "bin" . DIRECTORY_SEPERATOR);
+define("BIN", ROOT . "bin" . DIRECTORY_SEPARATOR);
 
-if(!file_exists(BIN . "setup.php"){
+if(!file_exists(BIN . "setup.php")){
     //Process the command from here.
     if($argc >= 2){
-        $command = str_replace(strtolower($argv[1]);
+        $command = str_replace(".php", "", strtolower($argv[1]) );
         if(file_exists(BIN . $command . ".php")){
-            require_once(BIN . $command . "php");
-            if(class_exists()){
-                $params = array_shift( array_shift($argv) );
+            require_once(BIN . $command . ".php");
+            if(class_exists($command)) {
+                $params = array_shift(array_shift($argv));
                 $execute = new $command($params);
+            }
         }
     } else {
         //Print info and standard help message.
+        if( (count($argv) == 1) || ($argv[2] == "--help")){
+            echo "mFrame CLI - Decendent.". PHP_EOL;
+            echo "mFrame v1.5" . PHP_EOL;
+            echo "decendent v1.1" . PHP_EOL . PHP_EOL;
+            echo "All instructions are currently for linux CLI terminals. ". PHP_EOL . PHP_EOL;
+            echo "Usage: php decendent [command] [params]" . PHP_EOL . PHP_EOL;
+            echo "example: php decendent make controller" . PHP_EOL . PHP_EOL;
+            echo "for a list of commands, please run php decendent --commands";
+        }
+
+        if($argv[2] == "--commands"){
+            echo "Available commands:" . PHP_EOL;
+            foreach( realScan(BIN) as $commandFile){
+                echo str_replace(".php", "", strtolower($commandFile) ) . PHP_EOL;
+            }
+            echo PHP_EOL . "For more information, run php decendent [command] --help";
+        } else {
+            if(file_exists(BIN . strtolower($argv[2]) .  ".php")){
+                $cFile = BIN . strtolower($argv[2]) .  ".php";
+                $params = array_slice($argv, 2);
+                require_once($cFile);
+
+                $cls = extractName($cFile, "n") . "\\" . extractName($cFile, "c");
+                $execute = new $cls($params);
+            }
+        }
     }
 } 
 

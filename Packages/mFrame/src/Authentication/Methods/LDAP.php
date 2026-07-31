@@ -1,6 +1,6 @@
 <?php
 
-namespace mFrame\Authentication;
+namespace mFrame\Authentication\Methods;
 
 use mFrame\Pattern\Factory;
 

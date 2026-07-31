@@ -1,6 +1,6 @@
 <?php
 
-namespace mFrame\Authentication;
+namespace mFrame\Authentication\Helpers;
 
 use mFrame\Pattern\Factory;
 
@@ -25,6 +25,10 @@ class Cookie extends Factory {
         }
 
         return false;
+    }
+
+    public function getCookieData() : mixed {
+        return $this->cookie_data;
     }
 
     public function validateCookie() : bool {

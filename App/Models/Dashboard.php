@@ -1,6 +1,5 @@
 <?php
 
-namespace mSkel\App\Models;
 
 use mFrame\Axis\Model;
 

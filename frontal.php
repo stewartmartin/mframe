@@ -54,44 +54,23 @@ class frontal {
     }
 
     protected function render(array $parsed_request) : void {
-        $file = APP . "Views" . DIRECTORY_SEPARATOR . $parsed_request["viewFile"] . ".php";
-        if(file_exists($file)) {
-            $action = $parsed_request["switch"];
-            $data = $parsed_request["data"];
-            $theme_data = array(
-                "file" => $file,
-                "action" => $action,
-                "data" => $data,
-            );
+        if (defined("Structure_App_Views")) {
+            $file = Structure_App_Views . $parsed_request["viewFile"] . ".php";
+            if (file_exists($file)) {
+                $action = $parsed_request["switch"];
+                $data = $parsed_request["data"];
+                $theme_data = array(
+                    "file" => $file,
+                    "action" => $action,
+                    "data" => $data,
+                );
 
-            $theme = Theme::initiate( array("parsed_view" => $theme_data) );
-            $theme::render();
-        }
-    }
-
-    public static function setStructure(array $customStructure = []) : bool {
-        if(empty($customStructure)){
-            $structure = array(
-                "App" => "App",
-                "Directives" => "Directives",
-                "Packages" => "Packages",
-                "Public" => "Public",
-                "Seeds" => "Seeds",
-                "Skin" => "Skin"
-            );
-        } else {
-            $structure = $customStructure;
-        }
-
-        foreach($structure as $key => $directory){
-            if(is_dir(ROOT . $directory . DIRECTORY_SEPARATOR)){
-                define(strtoupper($key), ROOT . $directory . DIRECTORY_SEPARATOR);
-            } else {
-                terminate("Invalid directory passed fr structure.");
+                $theme = Theme::initiate(array("parsed_view" => $theme_data));
+                $theme::render();
             }
         }
 
-        return true;
+
     }
 
     /*

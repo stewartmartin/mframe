@@ -6,10 +6,10 @@
  * SOX or PCI as they are written as catch alls.
  */
 
-namespace mFrame\Authentication;
+namespace mFrame\Authentication\Helpers;
 
-use mFrame\Pattern\Factory;
 use mFrame\Axis\Model;
+use mFrame\Pattern\Factory;
 
 class Session extends Factory {
 

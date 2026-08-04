@@ -6,13 +6,15 @@ use mFrame\Uri\Router;
 use mFrame\Uri\Request;
 use mFrame\Render\Theme;
 
+use mSkel\App\MiddleWare\Auth;
+
 class frontal {
 
     protected Router $Router;
     protected Request $Request;
 
     public function __construct(){
-        $this->Router = Router::initiate([]);
+        $this->Router = Router::initiate(["auth" => new Auth()]);
         $this->Request = Request::initiate([]);
 
         if(defined("Structure_Directives_Routes")){

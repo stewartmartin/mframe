@@ -15,4 +15,5 @@ return array(
 
         ),
     ),
+    "JTW_Key" => "lEaJSziAhrcpbPqSzQzFCqpX", //placeholder for testing.
 );

@@ -3,11 +3,12 @@
 namespace mFrame\Pattern;
 
 use mframe\Base\Configuration;
+use mFrame\Base\Mutator;
 
 #[\AllowDynamicProperties]
 abstract class Factory {
 
-    use Configuration;
+    use Configuration, Mutator;
 
     public function __construct(mixed $params = ""){
         if(!empty($params)){

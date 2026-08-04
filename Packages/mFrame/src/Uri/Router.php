@@ -3,17 +3,45 @@
 namespace mFrame\Uri;
 
 use mFrame\Pattern\Singleton;
+use mFrame\Uri\Request;
 
 class Router extends Singleton {
 
     protected static array $routeCollection = [];
+    protected static object $auth;
 
     public static function run(){
+        if(array_key_exists("Auth", self::$rawConfig) && is_object(self::$rawConfig["Auth"])){
+            self::$auth = self::$rawConfig["Auth"];
+        } else {
+            terminate("Auth not passed, or configured.");
+        }
+
         static::$routeCollection["GET"] = array();
         static::$routeCollection["POST"] = array();
     }
 
-    public static function Add(string $requestMethod, string $uriPattern, callable $callback, bool $Override = false): void {
+    public static function Add(string $requestMethod, string $uriPattern, callable $callback, bool $restricted = false, string $restrictedGroup = null, bool $Override = false): void {
+        if($restricted){
+            self::$auth->setAuth();
+            if(!self::$auth->checkStatus()){
+                Request::redirect("/restricted");
+            }
+
+            if(!is_null($restrictedGroup)){
+                $groups = self::$auth->buildUser();
+                if(!empty($groups["groups"])){
+                    $arr = $groups["groups"]->pull("group_name");
+                    if(is_int($restrictedGroup)){
+                        $arr = $groups["groups"]->pull("group_id");
+                    }
+                    if(!in_array($restrictedGroup, $arr)){
+                        Request::redirect("/unauthorized");
+                    }
+                }
+            }
+        }
+
         if($Override){
             static::$routeCollection[strtoupper($requestMethod)] = [strtolower($uriPattern) => $callback];
         }
@@ -49,11 +77,13 @@ class Router extends Singleton {
         static::getDirective("application", "domain_name") . "/" . $path;
     }
 
-    public static function RouteReturn(string $controller, string $method = "index", array $params = []) : array {
+    public static function RouteReturn(string $controller, string $method = "index", array $params = [], bool $restricted = false, string $restrictedGroup = null) : array {
         return array(
             "Controller" => $controller,
             "Method" => $method,
-            "Params" => $params
+            "Params" => $params,
+            "Restricted" => $restricted,
+            "RestrictedGroup" => $restrictedGroup
         );
     }
 

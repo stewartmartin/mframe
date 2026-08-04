@@ -3,15 +3,14 @@
 namespace mFrame\Authentication;
 
 use mFrame\Authentication\Helpers\{Ban, Session, Cookie, Token};
-use mFrame\Authentication\Methods\{Local, LDAP};
+use mFrame\Authentication\Methods\{Local, LDAP, Google, Meta};
 use mFrame\Pattern\Factory;
 
 class Identification extends Factory {
 
     public Session $Session;
     public Cookie $Cookie;
-    public LDAP | Local $Method;
-    //public DBhelper $Ban;
+    public LDAP | Local | Google | Meta $Method;
     public Ban $Ban;
     public Token $Token;
     public int $attempt = 1;
@@ -20,10 +19,10 @@ class Identification extends Factory {
     public bool $authRequired = false;
 
     public function run() : bool {
-        if(strtolower(self::getDirective("Authentication", "Method.php")) == "ldap"){
+        if(strtolower(self::getDirective("Authentication", "Method")) == "ldap"){
             $method = "LDAP";
         } else {
-            $method = ucfirst(self::getDirective("Authentication", "Method.php"));
+            $method = ucfirst(self::getDirective("Authentication", "Method"));
         }
 
         if(!is_null( $this->Cookie->getCookieData("Banned") ) ){
@@ -39,6 +38,8 @@ class Identification extends Factory {
 
         $this->Session = new Session();
         $this->Cookie = new Cookie();
+
+        $this->Token = new Token( self::getDirective("Authentication", "Token") );
 
         return $this->checkStatus();
     }
@@ -67,20 +68,7 @@ class Identification extends Factory {
     }
 
     protected function checkStatus(): bool {
-        if(!empty($_SESSION) && isset( $_COOKIE[ self::getDirective("Authentication", "CookieName") ] )){
-            $cookie = $this->Cookie->getCookieData();
-            if(array_key_exists("username", $cookie)){
-                $username = $cookie["username"];
-            }
-        } else {
-            $username = $_SESSION["username"];
-        }
-
-        if(!$this->Ban->checkBan() && isset($username)) {
-            return $this->Method->bySessionCookie($username);
-        }
-
-        return false;
+        return $this->Method->bySessionCookie();
     }
 
 }

@@ -4,6 +4,8 @@ use mFrame\Uri\Router;
 use mFrame\Uri\Request;
 use mSkel\App\MiddleWare\Auth;
 
+$auth = new Auth();
+
 Router::Add("GET", "/", function(){
     return Router::RouteReturn(
         "login",
@@ -30,4 +32,16 @@ Router::Add("POST", "/setup", function(){
         "configure",
         Request::SanitizePost($_POST) ?: array()
     );
+});
+
+Router::Add("GET", "/dasboard", function(){
+    global $auth;
+    $auth->setAuth();
+    if($auth->isAuthenticated()){
+        return Router::RouteReturn(
+            "dashboard",
+            "index",
+        );
+    }
+    Request::Redirect("/login");
 });

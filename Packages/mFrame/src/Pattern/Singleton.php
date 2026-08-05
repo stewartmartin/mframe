@@ -10,16 +10,25 @@ abstract class Singleton {
 
     private static array $instance;
 
-    private function __construct($config) {
-        if(is_object($config)){
-            $config = json_decode(json_encode($config), true);
+    private function __construct(mixed $config = "") {
+        if(!empty($config)){
+            if(is_array($config)){
+                self::$rawConfig = $config;
+                self::processConfigs();
+            } else {
+                foreach ($config as $directive => $value) {
+                    if (self::validateStatic($directive)) {
+                        self::pushStatic($directive, $value);
+                    }
+                }
+            }
         }
 
-        static::$rawConfig = $config;
-
-        if(!empty(static::$rawConfig)){
-            static::processConfigs();
+        $singleton = self::reflectStatic();
+        if(method_exists($singleton, "loadDirectives")){
+            $this->loadDirectives();
         }
+
     }
     private function __clone() {}
     private function __wakeup() {}
@@ -44,5 +53,5 @@ abstract class Singleton {
      * As this is an abstract class the fun method is required for any class that extends this Singleton.
      */
     abstract public static function run();
-
+    abstract protected static function loadDirectives(string $container = "", string $directive = "", string $subDirective = "" ) : bool;
 }

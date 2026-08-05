@@ -4,7 +4,7 @@ namespace mSkel\App\Controllers;
 
 use mFrame\Axis\Controller;
 
-class Login extends Controller {
+class Error extends Controller {
 
     public function unauthorized(){
         return $this->standardReturn("error", [], "unauthorized");

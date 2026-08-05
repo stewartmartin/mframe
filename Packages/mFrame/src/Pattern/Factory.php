@@ -24,9 +24,6 @@ abstract class Factory {
                 }
             }
         }
-        if(method_exists($this, "loadDirectives")){
-            $this->loadDirectives();
-        }
 
         if(method_exists($this, "run")){
             $this->run();
@@ -34,6 +31,17 @@ abstract class Factory {
     }
 
     abstract public function run();
-    abstract protected function loadDirectives(string $container = "", string $directive = "", string $subDirective = "") : bool;
+    public function loadDirectives(string $container = "", string $directive = "", string $subDirective = "") : bool {
+        if(!empty($container)){
+            if(!empty($directive)){
+                if(!empty($subDirective)){
+                    return self::getConfig($directive, $subDirective, $container);
+                }
+                return self::getConfig($directive, $container);
+            }
+            return self::getConfig($container);
+        }
+        return false;
+    }
 
 }

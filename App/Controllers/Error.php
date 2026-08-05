@@ -29,4 +29,6 @@ class Error extends Controller {
     protected function setRequirements(): void {
 
     }
+
+    protected function loadRequirements(): void {}
 }

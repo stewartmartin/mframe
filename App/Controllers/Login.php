@@ -11,8 +11,6 @@ class Login extends Controller {
         $this->requiredMiddleWare = ["Auth" => "mSkel\\App\\MiddleWare\\Auth"];
     }
 
-    public function index(){
-
-    }
-
+    public function index() : mixed {}
+    public function loadDirectives(string $container = "", string $directive = "", string $subDirective = ""): bool {}
 }

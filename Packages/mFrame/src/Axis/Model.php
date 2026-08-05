@@ -16,7 +16,7 @@ class Model extends Factory {
 
     protected string $id;
 
-    public function run(){
+    public function run() : void {
         if(is_null($this->db)){
             $db = new SQL();
             $this->db = $db->pull($this->requiredDB);

@@ -24,11 +24,6 @@ abstract class Singleton {
             }
         }
 
-        $singleton = self::reflectStatic();
-        if(method_exists($singleton, "loadDirectives")){
-            $this->loadDirectives();
-        }
-
     }
     private function __clone() {}
     private function __wakeup() {}
@@ -53,5 +48,16 @@ abstract class Singleton {
      * As this is an abstract class the fun method is required for any class that extends this Singleton.
      */
     abstract public static function run();
-    abstract protected static function loadDirectives(string $container = "", string $directive = "", string $subDirective = "" ) : bool;
+    protected static function loadDirectives(string $container = "", string $directive = "", string $subDirective = "" ) : bool {
+        if(!empty($container)){
+            if(!empty($directive)){
+                if(!empty($subDirective)){
+                    return self::getConfig($directive, $subDirective, $container);
+                }
+                return self::getConfig($directive, $container);
+            }
+            return self::getConfig($container);
+        }
+        return false;
+    }
 }

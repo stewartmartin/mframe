@@ -25,7 +25,7 @@ trait Configuration {
         return false;
     }
 
-    public static function getConfig(string $container, string $directive, string $sub_directive = "", bool $isPackage = false ) : bool {
+    public static function getConfig(string $container, string $directive = "", string $sub_directive = "", bool $isPackage = false ) : bool {
         //if isPackage is set to true, pkgDIRECTIVE must be set as a global.
         $config = false;
         if($isPackage){

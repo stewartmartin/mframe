@@ -8,25 +8,27 @@ return array(
     "routing" => array(
         "method" => "path",
         "directives" => array(
+            //A path can be one of three things. Path (folder/URI), port, or subdomain. If subdomain, the "entry" must be subdomain.
+            "method" => "path",
             "admin" => array(
                 "restricted" => true,
-                "path" => "control-panel/",
-                "routes_file" => ""
+                "entry" => "control-panel",
+                "routes_file" => "Admin.php"
             ),
             "member" => array(
                 "restricted" => true,
-                "path" => "member/",
-                "routes_file" => ""
-            ),
-            "team" => array(
-                "restricted" => true,
-                "path" => "team/",
-                "routes_file" => ""
+                "entry" => "member",
+                "routes_file" => ["site.php", "Member.php"],
             ),
             "site" => array(
                 "restricted" => false,
-                "path" => "",
-                "routes_file" => ""
+                "entry" => "/",
+                "routes_file" => "site.php"
+            ),
+            "api" => array(
+                "restricted" => false,
+                "entry" => "api",
+                "routes_file" => "Api.php"
             )
         ),
     ),

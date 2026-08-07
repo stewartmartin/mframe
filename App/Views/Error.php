@@ -1,10 +1,10 @@
-<?php if($viewRequested == "index"): ?>
+<?php if($action == "index"): ?>
 
-<?php elseif($viewRequested == "unauthorized"): ?>
+<?php elseif($action == "unauthorized"): ?>
 
-<?php elseif($viewRequested == "internal"): ?>
+<?php elseif($action == "internal"): ?>
 
-<?php elseif($viewRequested == "restricted"): ?>
+<?php elseif($action == "restricted"): ?>
 
 <?php else: /* Not found will be handled here */ ?>
 

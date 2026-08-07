@@ -16,6 +16,7 @@ class frontal {
     public function __construct(){
         $this->Router = Router::initiate(["auth" => new Auth()]);
         $this->Request = Request::initiate([]);
+        $this->setArea();
 
         if(defined("Structure_Directives_Routes")){
             if(is_dir(Structure_Directives_Routes)){
@@ -29,6 +30,48 @@ class frontal {
         }
 
         terminate("There was an issue parsing the request for this application.");
+    }
+
+    protected function setArea() : bool {
+        if(!empty(Request::$requested_area)){
+            if(Request::$requested_area["Restricted"]){
+                $auth = new Auth();
+                $auth->setAuth(true);
+                if(!$auth->checkStatus()){
+                    //Send them to login?
+                    Request::redirect("/login");
+                }
+            }
+        }
+
+        if(defined("Structure_Directives_Routes")){
+            $loaded = false;
+            if(is_string(Request::$requested_area["routes_file"])){
+                if(is_file(Structure_Directives_Routes . Request::$requested_area["routes_file"])){
+                    require_once(Structure_Directives_Routes . Request::$requested_area["routes_file"]);
+                    $loaded = true;
+                } else{
+                    terminate("Could not locate required routes file.");
+                }
+            }
+
+            if(is_array(Request::$requested_area["routes"])){
+                foreach(Request::$requested_area["routes"] as $route){
+                    if(is_file(Structure_Directives_Routes . $route)){
+                        require_once(Structure_Directives_Routes . $route);
+                    } else {
+                        terminate("Could not locate required routes file.");
+                    }
+                }
+                $loaded = true;
+            }
+
+            if($loaded){
+                $this->load_controller( $this->Router->dispatch() );
+                return true;
+            }
+        }
+        return false;
     }
 
     protected function load_controller(array $parse_request) : void {

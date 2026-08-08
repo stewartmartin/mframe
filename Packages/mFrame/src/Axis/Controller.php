@@ -7,14 +7,18 @@ use mFrame\Pattern\Factory;
 abstract class Controller extends Factory {
 
     public array $requiredModels = [];
+    public array $requiredHelpers = [];
+    public array $requiredMiddleware = [];
     public bool $isApi = false;
 
-    public function run(){
-        if(empty($this->requiredModels)){
+    public function run() : void {
+        if(empty($this->requiredModels) || empty($this->requiredHelpers) || empty($this->requiredMiddleware)){
             if(method_exists($this, "setRequirements")){
                 $this->setRequirements();
             }
         }
+
+        $this->loadRequirements();
     }
 
     protected function loadRequirements() : void {
@@ -28,31 +32,29 @@ abstract class Controller extends Factory {
         }
 
         if(!empty($this->requiredMiddelwares)){
-            $requires["Middlewares"] = $this->requiredMiddlewares;
+            $requires["Middleware"] = $this->requiredMiddleware;
         }
 
-        if($this->protected && !array_key_exists("Authentication", $requires["Middlewares"])){
-            $requires["Middlewares"]["Authentication"] = "app\\middlewares\\Auth";
+        if(empty($requires)){
+            return;
         }
 
         foreach($requires as $pointer => $required){
-            $path = "STRUCTURE_APP_" . strtoupper($pointer);
+            $path = "Structure_App_" . ucfirst(strtolower($pointer));
             if(!defined($path)){
-                if(is_dir(ROOT . "App" . DIRECTORY_SEPARATOR . strtolower($pointer))){
-                    define($path, ROOT . "App" . DIRECTORY_SEPARATOR . strtolower($pointer) . DIRECTORY_SEPARATOR);
+                $target = ucfirst(strtolower($pointer));
+                if(is_dir(ROOT . "App" . DIRECTORY_SEPARATOR . $target)){
+                    define($path, ROOT . "App" . DIRECTORY_SEPARATOR . $target . DIRECTORY_SEPARATOR);
                 }
             }
 
-            foreach($required as $variable => $fullClassName){
-                if(!class_exists($fullClassName)){
-                    if(file_exists($$path . $fullClassName . ".php")){
-                        require_once($$path . $fullClassName . ".php");
-                    }
-
-                    terminate("The class " . $fullClassName . " does not exist.");
+            //This needs refactoring and sent back to the framework.
+            foreach($required as $property => $classFile){
+                if(file_exists($path . ucfirst(strtolower($classFile)) . ".php")){
+                    $class = extractName($path . ucfirst(strtolower($classFile)) . ".php", "n") . "\\" . extractName($path . ucfirst(strtolower($classFile)) . ".php", "c");
+                    require_once($path . ucfirst(strtolower($classFile)) . ".php");
+                    $this->push($property, new $class());
                 }
-
-                $this->push($variable, new $fullClassName());
             }
         }
     }

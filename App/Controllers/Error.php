@@ -27,8 +27,9 @@ class Error extends Controller {
     }
 
     protected function setRequirements(): void {
-
+        $this->requiredModels = [];
+        $this->requiredMiddleWare = [];
+        $this->requiredHelpers = [];
     }
 
-    protected function loadRequirements(): void {}
 }

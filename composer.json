@@ -1,0 +1,19 @@
+{
+  "name": "merjit/mframe",
+  "description": "A framework designed to facilitate the development of web applications",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Richard Martin",
+      "email": "stewartmartin85@gmail.com"
+    }
+  ],
+  "keywords": [
+    "framework",
+    "mframe"
+  ],
+  "require": {
+    "php": "^8.2",
+  }
+}

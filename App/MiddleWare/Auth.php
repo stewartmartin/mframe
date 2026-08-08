@@ -27,6 +27,12 @@ class Auth extends Identification {
             }
         }
 
+        if($this->Token->hasToken){
+            if($this->user_token->findBy("token", $this->Token->extractToken())){
+                return $this->Token->compareToken($this->user_token->pull("token"));
+            }
+        }
+
         if($this->Cookie->pullCookie()){
             $cookie = $this->Cookie->getCookieData();
             if(array_key_exists("user_id", $cookie)){

@@ -42,30 +42,40 @@ class Request extends Singleton {
     protected static function setArea() : bool {
         $current_url = static::currentRequest();
 
-        if($current_url["host"] == static::$UriEntry){
-            if(static::$method == "port" && ($current_url["port"] !== 80 && $current_url["port"] !== 443)){
+        if($current_url["host"] == static::$UriEntry) {
+            if (static::$method == "port" && ($current_url["port"] !== 80 && $current_url["port"] !== 443)) {
                 $entry = $current_url["port"];
-            } elseif(static::$method == "subdomain"){
+            } elseif (static::$method == "subdomain") {
                 //Might need to refactor this at a later date to include multiple subdomains.
                 $entry = explode(".", $current_url["host"])[0];
             } else {
                 $path_parts = explode("/", ltrim($current_url["path"], "/"));
-                if(empty($path_parts[0])){
+                if (empty($path_parts[0])) {
                     $entry = "/";
                 } else {
                     $entry = $path_parts[0];
                 }
             }
 
+
             //Now that we have the method we can run through the directives.
-            foreach(static::$areas as $area_key => $area_directives){
-                if($area_directives["path"] == $entry){
+            $loaded = false;
+            foreach (static::$areas as $area_key => $area_directives) {
+                if ($area_directives["path"] == $entry) {
                     static::$requested_area = static::$areas[$area_key];
-                    return true;
+                    $loaded = true;
                 }
             }
-            terminate("Invalid entry token.");
+
+            if (array_key_exists("member", static::$areas)) {
+                if (array_key_exists("routes_file", static::$areas["member"])) {
+                    static::$requested_area = [static::$requested_area["routes_files"], static::$areas["member"]["routes_file"]];
+                }
+            }
+
+            return $loaded;
         }
+        terminate("Set host does not match requested host.");
     }
 
     public static function pullBase() : string {

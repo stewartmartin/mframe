@@ -14,22 +14,9 @@ class frontal {
     protected Request $Request;
 
     public function __construct(){
-        $this->Router = Router::initiate(["auth" => new Auth()]);
+        $this->Router = Router::initiate([]);
         $this->Request = Request::initiate([]);
         $this->setArea();
-
-        if(defined("Structure_Directives_Routes")){
-            if(is_dir(Structure_Directives_Routes)){
-                autoload(Structure_Directives_Routes);
-
-                $dispatch = $this->Router->dispatch();
-                if(is_array($dispatch)){
-                    $this->load_controller($dispatch);
-                }
-            }
-        }
-
-        terminate("There was an issue parsing the request for this application.");
     }
 
     protected function setArea() : bool {
@@ -37,7 +24,8 @@ class frontal {
             if(Request::$requested_area["Restricted"]){
                 $auth = new Auth();
                 $auth->setAuth(true);
-                if(!$auth->checkStatus()){
+                define("Auth", $auth);
+                if(!$auth->isAuthenticated()){
                     //Send them to login?
                     Request::redirect("/login");
                 }
@@ -105,12 +93,12 @@ class frontal {
                 $action = $parsed_request["switch"];
                 $data = $parsed_request["data"];
                 $theme_data = array(
-                    "file" => $file,
-                    "action" => $action,
-                    "data" => $data,
+                    "viewFile" => $file,
+                    "viewAction" => $action,
+                    "viewData" => $data,
                 );
 
-                $theme = Theme::initiate(array("parsed_view" => $theme_data));
+                $theme = Theme::initiate( $theme_data );
                 $theme::render();
             }
         }
@@ -170,7 +158,10 @@ class frontal {
 
     protected static function loadStructure(bool $returnStructure = false) : bool | array {
         $directories = array(
-            "Public" => "Public",
+            "Public" => array(
+                "ROOT" => "Public",
+                "Skin" => "Skin",
+            ),
             "bin" => "bin",
             "App" =>
                 array(
@@ -178,7 +169,7 @@ class frontal {
                     "Models" => "Models",
                     "Views" => "Views",
                     "Controllers" => "Controllers",
-                    "Middlewares" => "Middlewares",
+                    "Middleware" => "Middleware",
                 ),
             "Directives" =>
                 array(
@@ -186,7 +177,11 @@ class frontal {
                     "Routes" => "Routes",
                 ),
             "Tasks" => "Tasks",
-            "Database" => "Database",
+            "Seeds" => array(
+                "ROOT" => "Seeds",
+                "Database" => "Database",
+                "MemCache" => "MemCache",
+            ),
             "Packages" => "Packages",
             "Storage" => array(
                 "ROOT" => "Storage",

@@ -8,9 +8,12 @@ class Login extends Controller {
 
     public function setRequirements(): void {
         $this->requiredModels = [];
-        $this->requiredMiddleWare = ["Auth" => "mSkel\\App\\MiddleWare\\Auth"];
+        $this->requiredMiddleWare = [];
     }
 
-    public function index() : mixed {}
+    public function index() : array | false {
+
+    }
+
     public function loadDirectives(string $container = "", string $directive = "", string $subDirective = ""): bool {}
 }

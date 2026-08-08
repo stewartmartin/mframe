@@ -8,14 +8,21 @@ use Exception;
 class Token extends Factory {
 
     private string $signing_key;
+    private string $header = "Authorization";
+    public string $token;
+    public bool $hasToken = false;
 
     public function run() : void {
-        if(!array_key_exists("jwt_key", self::$rawConfig)){
-            $jwt_key = self::getDirective("Session", "JWT_KEY");
-        } else {
-            $jwt_key = self::$rawConfig["jwt_key"];
+        if(empty(self::$rawConfig)){
+            self::$rawConfig = self::getDirective("Session");
         }
-        $this->signing_key = str_replace(['base64:', '='], '', $jwt_key);
+
+        if(array_key_exists("jwt_key", self::$rawConfig) && !empty(self::$rawConfig["jwt_key"])){
+            $this->signing_key = str_replace(['base64:', '='], '', self::$rawConfig["jwt_key"]);
+            if(array_key_exists("AuthHeader", self::$rawConfig)){
+                $this->header = self::$rawConfig["AuthHeader"];
+            }
+        }
     }
 
     public function encode(array $payload) : string {
@@ -52,8 +59,32 @@ class Token extends Factory {
         if (!hash_equals($signature, $validSignature)) {
             return null;
         }
-
+        $this->hasToken = true;
         return [ 'header' => $header, 'body' => $payload ];
+    }
+
+    public function extractToken() : string | false {
+        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+            $token = trim($_SERVER["HTTP_AUTHORIZATION"]);
+        } elseif (isset($_SERVER['Authorization'])) {
+            $token = trim($_SERVER["Authorization"]);
+        }
+
+        if (!empty($token)) {
+            if (preg_match('/Bearer\s(\S+)/i', $token, $matches)) {
+                $this->token = $matches[1];
+                return $this->token;
+            }
+        }
+
+        return false;
+    }
+
+    public function compareToken(string $expectedToken) : bool {
+        if($this->extractToken() == $expectedToken){
+            return true;
+        }
+        return false;
     }
 
 }

@@ -14,9 +14,26 @@ class Theme extends Singleton {
 
     public static bool $isApi = false;
 
+    protected static array $viewData = [];
+    protected static string $viewFile = "";
+    protected static string $viewAction = "";
+
     public static function run() : void {
-        if(static::getDirective("Application", "theme")){
-            static::$theme_directive = ucfirst( strtolower( static::getDirective("Application", "theme") ) );
+        if(static::$isApi){
+            renderApi(static::$viewData,"200", "Success");
+        }
+
+        if(static::getDirective("Application", "Theme")){
+            static::$theme_directive = ucfirst( strtolower( static::getDirective("Application", "Theme") ) );
+        }
+
+        if(defined("Structure_Public_Skin")){
+            if(is_dir(Structure_Public_Skin . static::$theme_directive . DIRECTORY_SEPARATOR )){
+                static::$theme_path = Structure_Public_Skin . static::$theme_directive . DIRECTORY_SEPARATOR;
+                if(file_exists(static::$theme_path . "skeleton.json")){
+                    static::$order = json_decode(file_get_contents(static::$theme_path . "skeleton.json"), true);
+                }
+            }
         }
 
         if(is_dir(SKIN . static::$theme_directive . DIRECTORY_SEPARATOR )){
@@ -31,7 +48,7 @@ class Theme extends Singleton {
     protected static function runPartials() : void {
         foreach( static::$order as $index => $file){
             if($index == "content"){
-                $process = static::Partial(static::$parsed_view["file"], static::$parsed_view["action"], static::$parsed_view["data"]);
+                $process = static::Partial(static::$viewFile, static::$viewAction, static::$viewData);
             } else {
                 $theme_part = static::$theme_path . $index . ".php";
                 $process = static::Partial($theme_part);
@@ -55,6 +72,11 @@ class Theme extends Singleton {
     }
 
     protected static function render(string $partial = "") : void {
+        self::runPartials();
+
+        if(!empty($partial)){
+            static::$partials["content"] .= $partial;
+        }
         echo implode("\n", static::$partials);
         exit;
     }
